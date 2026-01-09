@@ -1,0 +1,13 @@
+{
+  "name": "learning_buddy",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Kushal",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "workspaces": [
+    "apps/*"
+  ],
+  "license": "ISC"
+}
