@@ -1,12 +1,21 @@
 import React from "react";
-import HomeNavBar from "./Home-NavBar";
 
 const Header = () => {
   return (
-    <div className="flex w-full h-auto px-2 py-6 bg-slate-600 items-center justify-between text-white">
-      <div className="text-2xl font-bold pl-4">GigWorks</div>
-      <div className="pr-4">
-        <HomeNavBar />
+    <div className="w-full  py-3 flex justify-between items-center">
+      <div className=" flex items-center space-x-1">
+        <div className="w-20 h-20">
+          <img src="./logo.png" />
+        </div>
+        <div className="text-xl font-bold pb-2">Ai tools</div>
+      </div>
+      <div className="flex space-x-4 pr-6">
+        <div className="font-bold cursor-pointer w-20 h-12 items-center justify-center flex rounded-lg shadow-lg bg-white text-purple-600 hover:text-white hover:bg-purple-400">
+          Sign up
+        </div>
+        <div className="font-bold cursor-pointer w-20 h-12 items-center justify-center flex rounded-lg shadow-lg bg-purple-600 text-white hover:text-white hover:bg-purple-400">
+          Login
+        </div>
       </div>
     </div>
   );
