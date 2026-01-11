@@ -1,6 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 
 const Login = () => {
+  const [loginData, setLoginData] = useState({
+    userName: "",
+    password: "",
+    rememberMe: true,
+  });
+  console.log(loginData);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+  };
   return (
     <div className="w-full h-screen flex items-center">
       <div className="w-1/2 h-full flex flex-col justify-between items-center">
@@ -16,20 +25,28 @@ const Login = () => {
           <h2 className="text-3xl font-bold text-center text-purple-700 mb-6">
             Welcome Back 👋
           </h2>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <input
                 type="text"
+                value={loginData.userName}
                 id="username"
                 placeholder="Enter username"
+                onChange={(e) =>
+                  setLoginData({ ...loginData, userName: e.target.value })
+                }
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-700"
               />
             </div>
             <div className="mb-6">
               <input
                 type="password"
+                value={loginData.password}
                 id="password"
                 placeholder="Enter password"
+                onChange={(e) =>
+                  setLoginData({ ...loginData, password: e.target.value })
+                }
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-700"
               />
             </div>
@@ -37,6 +54,13 @@ const Login = () => {
               <label className="flex items-center text-gray-600">
                 <input
                   type="checkbox"
+                  checked={loginData.rememberMe}
+                  onChange={(e) => {
+                    setLoginData({
+                      ...loginData,
+                      rememberMe: e.target.checked,
+                    });
+                  }}
                   className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                 />
                 <span className="ml-2 text-sm">Remember Me</span>
