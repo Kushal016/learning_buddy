@@ -4,6 +4,8 @@ import "./App.css";
 import Home from "./components/Home";
 import Login from "./auth/login";
 import Signup from "./auth/signup";
+import Dashboard from "./components/Dashboard";
+import { ProtectedRoute } from "./auth-utility/ProtectedRoute";
 
 function App() {
   return (
@@ -11,6 +13,14 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

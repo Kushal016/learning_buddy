@@ -1,14 +1,40 @@
-import React, { useState } from "react";
-
+import React, { useEffect, useState } from "react";
+import { setAuthData } from "../auth-utility/authStorage";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../auth-utility/AuthContext";
+import api from "../auth-utility/axiosInstance";
 const Login = () => {
+  const { user, setUser } = useAuth();
+  const navigate = useNavigate();
   const [loginData, setLoginData] = useState({
     userName: "",
     password: "",
     rememberMe: true,
   });
-  console.log(loginData);
+  // console.log(loginData);
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user]);
   const handleSubmit = (e) => {
     e.preventDefault();
+    apiCall(loginData);
+  };
+  const apiCall = async (data) => {
+    console.log("before api", data);
+    try {
+      const res = await api.post("/login", {
+        userName: data?.userName,
+        password: data?.password,
+        rememberMe: data?.rememberMe,
+      });
+      console.log("res", res.data);
+
+      setAuthData(res.data, data?.rememberMe);
+      setUser(res.data.user);
+      navigate("/dashboard");
+    } catch (error) {}
   };
   return (
     <div className="w-full h-screen flex items-center">

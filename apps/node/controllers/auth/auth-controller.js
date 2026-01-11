@@ -22,6 +22,10 @@ exports.doLogin = async (req, res) => {
     res.status(200).json({
       message: "Login successful",
       token,
+      user: {
+        id: user._id,
+        userName: user.userName,
+      },
       expiresIn,
     });
   } catch (err) {
