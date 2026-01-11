@@ -1,6 +1,6 @@
 import React from "react";
-import Header from "./Header";
-import { bulb, calander, paper, pen } from "../assets/icon";
+import Header from "../../common/Header";
+import { bulb, calander, paper, pen } from "../../assets/icon";
 
 const Home = () => {
   const cardData = [
