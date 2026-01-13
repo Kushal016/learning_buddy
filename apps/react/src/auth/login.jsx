@@ -34,7 +34,9 @@ const Login = () => {
       setAuthData(res.data, data?.rememberMe);
       setUser(res.data.user);
       navigate("/dashboard");
-    } catch (error) {}
+    } catch (error) {
+      console.log(error.message);
+    }
   };
   return (
     <div className="w-full h-screen flex items-center">

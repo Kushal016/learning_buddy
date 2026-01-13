@@ -1,7 +1,14 @@
 import React, { useCallback, useState } from "react";
 import Cropper from "react-easy-crop";
+import { GoogleLogin } from "@react-oauth/google";
+import api from "../auth-utility/axiosInstance";
+import { setAuthData } from "../auth-utility/authStorage";
+import { useAuth } from "../auth-utility/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
+  const { setUser } = useAuth();
+  const navigate = useNavigate();
   const [image, setImage] = useState(null);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -16,6 +23,31 @@ const Signup = () => {
     rememberMe: true,
     profileImage: null,
   });
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const res = await api.post("/google", {
+        token: credentialResponse.credential,
+      });
+
+      if (res?.data?.token && res?.data?.user) {
+        const authData = {
+          token: res?.data?.token,
+          user: {
+            ...res?.data?.user,
+          },
+        };
+        setAuthData(authData, signUpData?.rememberMe);
+        setUser(res.data.user);
+        navigate("/dashboard");
+      }
+
+      // localStorage.setItem("token", res.data.token);
+      console.log("User Logged In:", res.data.user);
+    } catch (err) {
+      console.error("Google login failed", err);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -63,7 +95,12 @@ const Signup = () => {
           <div className="font-semibold text-xl pt-2">Create your profile</div>
           <div className="text-sm text-slate-500 pt-1">
             Already have an account?{" "}
-            <span className="text-purple-500 font-bold">Login</span>
+            <span
+              className="text-purple-500 font-bold cursor-pointer"
+              onClick={() => navigate("/login")}
+            >
+              Login
+            </span>
           </div>
           <section className="mt-10 w-full">
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -90,7 +127,6 @@ const Signup = () => {
                   className="w-full px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-1 focus:ring-purple-700 shadow-md"
                 />
               </div>
-
               <input
                 type="text"
                 value={signUpData.userName}
@@ -101,7 +137,6 @@ const Signup = () => {
                 }
                 className="w-full px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-1 focus:ring-purple-700 shadow-md"
               />
-
               <input
                 type="password"
                 value={signUpData.password}
@@ -122,7 +157,6 @@ const Signup = () => {
                 }
                 className="w-full px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-1 focus:ring-purple-700 shadow-md"
               />
-
               <label className="flex items-center justify-center px-4 py-2 rounded-full bg-blue-100  text-blue-400 font-semibold cursor-pointer shadow-md hover:bg-blue-300 hover:text-white">
                 Upload Profile Picture
                 <input
@@ -132,30 +166,34 @@ const Signup = () => {
                   className="hidden"
                 />
               </label>
-
               <div className="flex items-center justify-between mb-6">
                 <label className="flex items-center text-gray-600">
                   <input
                     type="checkbox"
-                    // checked={loginData.rememberMe}
-                    // onChange={(e) => {
-                    //   setLoginData({
-                    //     ...loginData,
-                    //     rememberMe: e.target.checked,
-                    //   });
-                    // }}
+                    checked={signUpData.rememberMe}
+                    onChange={(e) => {
+                      setSignUpData({
+                        ...signUpData,
+                        rememberMe: e.target.checked,
+                      });
+                    }}
                     className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                   />
                   <span className="ml-2 text-sm">Remember Me</span>
                 </label>
               </div>
-
               <button
                 type="submit"
                 className="w-full bg-linear-to-r from-pink-600 via-purple-500 to-blue-600  text-white py-2 rounded-md font-bold shadow-lg hover:shadow-pink-500/50 hover:from-pink-600 hover:to-indigo-600 transition duration-300"
               >
-                Login
+                Sign up
               </button>
+              <GoogleLogin
+                shape={"pill"}
+                logo_alignment="center"
+                onSuccess={handleGoogleSuccess}
+                onError={() => console.log("Google Login Failed")}
+              />
             </form>
           </section>
         </div>

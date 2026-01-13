@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   rememberMe: { type: Boolean },
   dailyUsage: { type: Number },
-  lastLogin: { type: Date },
+  lastLogin: { type: String },
   profileImage: { type: String },
 });
 
