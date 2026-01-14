@@ -1,19 +1,15 @@
-import React, { useCallback, useState } from "react";
-import Cropper from "react-easy-crop";
+import React, { useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
-import api from "../auth-utility/axiosInstance";
-import { setAuthData } from "../auth-utility/authStorage";
+import { handleGoogleCallBack, setAuthData } from "../auth-utility/authStorage";
 import { useAuth } from "../auth-utility/AuthContext";
 import { useNavigate } from "react-router-dom";
+import UploadAvatar from "./uploadAvatar";
+import api from "../auth-utility/axiosInstance";
 
 const Signup = () => {
   const { setUser } = useAuth();
   const navigate = useNavigate();
-  const [image, setImage] = useState(null);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
+
   const [signUpData, setSignUpData] = useState({
     userName: "",
     password: "",
@@ -26,24 +22,12 @@ const Signup = () => {
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      const res = await api.post("/google", {
-        token: credentialResponse.credential,
+      handleGoogleCallBack({
+        credentialResponse,
+        rememberMe: signUpData.rememberMe,
+        setUser,
+        navigate,
       });
-
-      if (res?.data?.token && res?.data?.user) {
-        const authData = {
-          token: res?.data?.token,
-          user: {
-            ...res?.data?.user,
-          },
-        };
-        setAuthData(authData, signUpData?.rememberMe);
-        setUser(res.data.user);
-        navigate("/dashboard");
-      }
-
-      // localStorage.setItem("token", res.data.token);
-      console.log("User Logged In:", res.data.user);
     } catch (err) {
       console.error("Google login failed", err);
     }
@@ -51,40 +35,22 @@ const Signup = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("signUpData", signUpData);
-    console.log("avatarData", avatarData);
+    apiCall(signUpData);
   };
+  const apiCall = async (data) => {
+    console.log("before api", data);
+    try {
+      const res = await api.post("/signup", {
+        ...data,
+      });
+      console.log("res", res.data);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(URL.createObjectURL(file));
-      setShowModal(true);
+      setAuthData(res.data, data?.rememberMe);
+      setUser(res.data.user);
+      navigate("/dashboard");
+    } catch (error) {
+      console.log(error.message);
     }
-  };
-  // Capture crop area
-  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
-    setCroppedAreaPixels(croppedAreaPixels);
-  }, []);
-
-  // Convert cropped image to Base64
-  const getCroppedImage = async () => {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const img = new Image();
-    img.src = image;
-
-    await new Promise((resolve) => (img.onload = resolve));
-
-    const { x, y, width, height } = croppedAreaPixels;
-    canvas.width = width;
-    canvas.height = height;
-    ctx.drawImage(img, x, y, width, height, 0, 0, width, height);
-
-    const base64Image = canvas.toDataURL("image/jpeg");
-    setSignUpData({ ...signUpData, profileImage: base64Image });
-    console.log("Base64:", base64Image);
-    setShowModal(false);
   };
 
   return (
@@ -113,7 +79,7 @@ const Signup = () => {
                   onChange={(e) =>
                     setSignUpData({ ...signUpData, firstName: e.target.value })
                   }
-                  className="w-full px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-1 focus:ring-purple-700 shadow-md"
+                  className="w-full auth_input"
                 />
 
                 <input
@@ -124,7 +90,7 @@ const Signup = () => {
                   onChange={(e) =>
                     setSignUpData({ ...signUpData, lastName: e.target.value })
                   }
-                  className="w-full px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-1 focus:ring-purple-700 shadow-md"
+                  className="w-full auth_input"
                 />
               </div>
               <input
@@ -135,7 +101,7 @@ const Signup = () => {
                 onChange={(e) =>
                   setSignUpData({ ...signUpData, userName: e.target.value })
                 }
-                className="w-full px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-1 focus:ring-purple-700 shadow-md"
+                className="w-full auth_input"
               />
               <input
                 type="password"
@@ -145,7 +111,7 @@ const Signup = () => {
                 onChange={(e) =>
                   setSignUpData({ ...signUpData, password: e.target.value })
                 }
-                className="w-full px-4 py-2  bg-gray-100 rounded-full focus:outline-none focus:ring-1 focus:ring-purple-700 shadow-md"
+                className="w-full auth_input"
               />
               <input
                 type="email"
@@ -155,17 +121,10 @@ const Signup = () => {
                 onChange={(e) =>
                   setSignUpData({ ...signUpData, email: e.target.value })
                 }
-                className="w-full px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-1 focus:ring-purple-700 shadow-md"
+                className="w-full auth_input"
               />
-              <label className="flex items-center justify-center px-4 py-2 rounded-full bg-blue-100  text-blue-400 font-semibold cursor-pointer shadow-md hover:bg-blue-300 hover:text-white">
-                Upload Profile Picture
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-              </label>
+              <UploadAvatar {...{ signUpData, setSignUpData }} />
+
               <div className="flex items-center justify-between mb-6">
                 <label className="flex items-center text-gray-600">
                   <input
@@ -182,10 +141,7 @@ const Signup = () => {
                   <span className="ml-2 text-sm">Remember Me</span>
                 </label>
               </div>
-              <button
-                type="submit"
-                className="w-full bg-linear-to-r from-pink-600 via-purple-500 to-blue-600  text-white py-2 rounded-md font-bold shadow-lg hover:shadow-pink-500/50 hover:from-pink-600 hover:to-indigo-600 transition duration-300"
-              >
+              <button type="submit" className="w-full auth_button">
                 Sign up
               </button>
               <GoogleLogin
@@ -198,42 +154,6 @@ const Signup = () => {
             </form>
           </section>
         </div>
-        {showModal && (
-          <div className="fixed inset-0  bg-opacity-70 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 border border-amber-400">
-            <div className="bg-white p-1 w-1/3 h-2/3 rounded-lg shadow-lg">
-              <div className="relative w-full h-[85%] ">
-                <Cropper
-                  image={image}
-                  crop={crop}
-                  zoom={zoom}
-                  aspect={1}
-                  cropShape="round"
-                  showGrid={false}
-                  onCropChange={setCrop}
-                  onZoomChange={setZoom}
-                  onCropComplete={onCropComplete}
-                />
-              </div>
-              <div className="flex justify-end space-x-4 mt-4">
-                <button
-                  onClick={() => {
-                    setImage(null);
-                    setShowModal(false);
-                  }}
-                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 "
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={getCroppedImage}
-                  className="py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="w-1/2 h-full flex justify-between items-center  bg-linear-to-bl from-black via-purple-500 to-blue-600 ">

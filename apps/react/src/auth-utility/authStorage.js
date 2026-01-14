@@ -1,3 +1,5 @@
+import api from "./axiosInstance";
+
 export const setAuthData = ({ token, user }, rememberMe) => {
   console.log("from authData,", token, user);
 
@@ -15,3 +17,33 @@ export const getAuthUser = () => {
 };
 
 export const clearAuth = () => localStorage.clear() || sessionStorage.clear();
+
+export const handleGoogleCallBack = async ({
+  credentialResponse,
+  rememberMe,
+  setUser,
+  navigate,
+}) => {
+  try {
+    const res = await api.post("/google", {
+      token: credentialResponse.credential,
+    });
+
+    if (res?.data?.token && res?.data?.user) {
+      const authData = {
+        token: res?.data?.token,
+        user: {
+          ...res?.data?.user,
+        },
+      };
+      setAuthData(authData, rememberMe);
+      setUser(res.data.user);
+      navigate("/dashboard");
+    }
+
+    // localStorage.setItem("token", res.data.token);
+    console.log("User Logged In:", res.data.user);
+  } catch (err) {
+    console.error("Google login failed", err);
+  }
+};

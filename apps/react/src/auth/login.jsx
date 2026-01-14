@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { setAuthData } from "../auth-utility/authStorage";
+import { handleGoogleCallBack, setAuthData } from "../auth-utility/authStorage";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth-utility/AuthContext";
 import api from "../auth-utility/axiosInstance";
@@ -21,24 +21,12 @@ const Login = () => {
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      const res = await api.post("/google", {
-        token: credentialResponse.credential,
+      handleGoogleCallBack({
+        credentialResponse,
+        rememberMe: loginData.rememberMe,
+        setUser,
+        navigate,
       });
-
-      if (res?.data?.token && res?.data?.user) {
-        const authData = {
-          token: res?.data?.token,
-          user: {
-            ...res?.data?.user,
-          },
-        };
-        setAuthData(authData, loginData?.rememberMe);
-        setUser(res.data.user);
-        navigate("/dashboard");
-      }
-
-      // localStorage.setItem("token", res.data.token);
-      console.log("User Logged In:", res.data.user);
     } catch (err) {
       console.error("Google login failed", err);
     }
@@ -90,7 +78,7 @@ const Login = () => {
                 onChange={(e) =>
                   setLoginData({ ...loginData, userName: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-700"
+                className="w-full auth_input"
               />
             </div>
             <div className="mb-6">
@@ -102,7 +90,7 @@ const Login = () => {
                 onChange={(e) =>
                   setLoginData({ ...loginData, password: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-700"
+                className="w-full auth_input"
               />
             </div>
             <div className="flex items-center justify-between mb-6">
@@ -128,10 +116,7 @@ const Login = () => {
               </a>
             </div>
 
-            <button
-              type="submit"
-              className="w-full mb-4 bg-linear-to-r from-pink-600 via-purple-500 to-blue-600  text-white py-2 rounded-md font-bold shadow-lg hover:shadow-pink-500/50 hover:from-pink-600 hover:to-indigo-600 transition duration-300"
-            >
+            <button type="submit" className="w-full mb-4 auth_button">
               Login
             </button>
             <GoogleLogin
@@ -145,7 +130,7 @@ const Login = () => {
           <p className="text-sm text-gray-500 text-center mt-6">
             Don't have an account?{" "}
             <span
-              className="text-indigo-600 font-semibold hover:underline cursor-pointer"
+              className="text-purple-500 font-bold cursor-pointer"
               onClick={() => navigate("/signup")}
             >
               Sign up
