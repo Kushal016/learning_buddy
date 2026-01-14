@@ -190,6 +190,7 @@ const Signup = () => {
               </button>
               <GoogleLogin
                 shape={"pill"}
+                text={"signup_with"}
                 logo_alignment="center"
                 onSuccess={handleGoogleSuccess}
                 onError={() => console.log("Google Login Failed")}

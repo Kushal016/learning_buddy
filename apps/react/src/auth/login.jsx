@@ -3,6 +3,7 @@ import { setAuthData } from "../auth-utility/authStorage";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth-utility/AuthContext";
 import api from "../auth-utility/axiosInstance";
+import { GoogleLogin } from "@react-oauth/google";
 const Login = () => {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
@@ -17,6 +18,32 @@ const Login = () => {
       navigate("/dashboard");
     }
   }, [user]);
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const res = await api.post("/google", {
+        token: credentialResponse.credential,
+      });
+
+      if (res?.data?.token && res?.data?.user) {
+        const authData = {
+          token: res?.data?.token,
+          user: {
+            ...res?.data?.user,
+          },
+        };
+        setAuthData(authData, loginData?.rememberMe);
+        setUser(res.data.user);
+        navigate("/dashboard");
+      }
+
+      // localStorage.setItem("token", res.data.token);
+      console.log("User Logged In:", res.data.user);
+    } catch (err) {
+      console.error("Google login failed", err);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     apiCall(loginData);
@@ -40,7 +67,7 @@ const Login = () => {
   };
   return (
     <div className="w-full h-screen flex items-center">
-      <div className="w-1/2 h-full flex flex-col justify-between items-center">
+      <div className="w-1/2 h-full flex flex-col justify-between items-center bg-linear-to-bl from-black via-purple-400 to-blue-400 ">
         <div className="`h-64 w-64 pr-6">
           <img src="login1.png" />
         </div>
@@ -103,19 +130,26 @@ const Login = () => {
 
             <button
               type="submit"
-              className="w-full bg-linear-to-r from-pink-600 via-purple-500 to-blue-600  text-white py-2 rounded-md font-bold shadow-lg hover:shadow-pink-500/50 hover:from-pink-600 hover:to-indigo-600 transition duration-300"
+              className="w-full mb-4 bg-linear-to-r from-pink-600 via-purple-500 to-blue-600  text-white py-2 rounded-md font-bold shadow-lg hover:shadow-pink-500/50 hover:from-pink-600 hover:to-indigo-600 transition duration-300"
             >
               Login
             </button>
+            <GoogleLogin
+              shape={"circle"}
+              text={"continue_with"}
+              logo_alignment="center"
+              onSuccess={handleGoogleSuccess}
+              onError={() => console.log("Google Login Failed")}
+            />
           </form>
           <p className="text-sm text-gray-500 text-center mt-6">
-            Don't have an account?
-            <a
-              href="#"
-              className="text-indigo-600 font-semibold hover:underline"
+            Don't have an account?{" "}
+            <span
+              className="text-indigo-600 font-semibold hover:underline cursor-pointer"
+              onClick={() => navigate("/signup")}
             >
               Sign up
-            </a>
+            </span>
           </p>
         </div>
         {/* </div> */}
