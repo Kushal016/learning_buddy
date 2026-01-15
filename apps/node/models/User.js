@@ -10,6 +10,8 @@ const userSchema = new mongoose.Schema({
   dailyUsage: { type: Number },
   lastLogin: { type: String },
   profileImage: { type: String },
+  resetPasswordToken: { type: String },
+  resetPasswordExpire: { type: Date },
 });
 
 module.exports = mongoose.model("User-profile", userSchema);
