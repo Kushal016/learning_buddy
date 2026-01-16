@@ -31,13 +31,26 @@ const Login = () => {
       console.error("Google login failed", err);
     }
   };
-
+  const handleForgotPassword = async () => {
+    try {
+      if (loginData?.userName !== "") {
+        const res = await api.post("/forgot-password", {
+          userName: loginData?.userName,
+        });
+        if (res.data.success) {
+          alert("Rest password email sent to the associated email address.");
+        }
+      } else {
+        // console.log("");
+        alert("Please enter username");
+      }
+    } catch (error) {}
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
     apiCall(loginData);
   };
   const apiCall = async (data) => {
-    console.log("before api", data);
     try {
       const res = await api.post("/login", {
         userName: data?.userName,
@@ -108,12 +121,12 @@ const Login = () => {
                 />
                 <span className="ml-2 text-sm">Remember Me</span>
               </label>
-              <a
-                href="#"
-                className="text-sm text-indigo-600 hover:underline font-medium"
+              <div
+                className="text-sm text-indigo-600 hover:underline cursor-pointer font-medium"
+                onClick={() => handleForgotPassword()}
               >
                 Forgot Password?
-              </a>
+              </div>
             </div>
 
             <button type="submit" className="w-full mb-4 auth_button">
