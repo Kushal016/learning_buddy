@@ -83,11 +83,11 @@ exports.doLogin = async (req, res) => {
 exports.doSignUp = async (req, res) => {
   try {
     const inputData = req.body;
-    console.log(inputData);
+    // console.log(inputData);
 
     const existingUser = await User.findOne({ userName: inputData?.userName });
     if (existingUser)
-      res.status(400).json({ message: "User already present." });
+      return res.status(400).json({ message: "User already present." });
     const hashedPass = await bcrypt.hash(
       inputData?.password,
       parseInt(process.env.SALT || 10)
@@ -115,7 +115,7 @@ exports.doSignUp = async (req, res) => {
       { expiresIn }
     );
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Signup successful",
       token,
       expiresIn,
@@ -128,7 +128,7 @@ exports.doSignUp = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    return res.status(400).json({ error: err.message });
   }
 };
 exports.forgotPassword = async (req, res) => {
@@ -165,14 +165,13 @@ exports.forgotPassword = async (req, res) => {
       message,
     });
 
-    res.json({ message: "Reset email sent" });
+    return res.json({ message: "Reset email sent", success: true });
   } catch (error) {
-    res
-      .status(400)
-      .json({
-        message: "Unable to send reset password mail.",
-        err: error.message,
-      });
+    return res.status(400).json({
+      message: "Unable to send reset password mail.",
+      err: error.message,
+      success: false,
+    });
   }
 };
 exports.resetPassword = async (req, res) => {
@@ -187,19 +186,21 @@ exports.resetPassword = async (req, res) => {
       resetPasswordExpire: { $gt: Date.now() },
     });
 
-    if (!user)
+    if (!user) {
       return res.status(400).json({ message: "Invalid or expired token" });
-
+    }
     user.password = await bcrypt.hash(password, 10);
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
 
     await user.save();
 
-    res.json({ message: "Password reset successful" });
+    return res.json({ message: "Password reset successful", success: true });
   } catch (error) {
-    res
-      .status(400)
-      .json({ message: "Unable to reset the password.", err: error.message });
+    return res.status(400).json({
+      message: "Unable to reset the password.",
+      err: error.message,
+      success: false,
+    });
   }
 };
