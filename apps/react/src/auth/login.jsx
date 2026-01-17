@@ -6,14 +6,14 @@ import api from "../auth-utility/axiosInstance";
 import { GoogleLogin } from "@react-oauth/google";
 const Login = () => {
   const { user, setUser, loading } = useAuth();
-  console.log("loading", loading);
-
   const navigate = useNavigate();
   const [loginData, setLoginData] = useState({
     userName: "",
     password: "",
     rememberMe: true,
   });
+  const [errors, setErrors] = useState({});
+
   // console.log(loginData);
   useEffect(() => {
     if (user) {
@@ -48,9 +48,27 @@ const Login = () => {
       }
     } catch (error) {}
   };
+  const validate = () => {
+    const newErrors = {};
+    if (loginData.userName === "") {
+      newErrors.userName = "Username is required";
+    } else if (loginData.userName.length < 3) {
+      newErrors.userName = "Invalid Username, must be at least 3 characters.";
+    }
+
+    if (loginData.password === "") {
+      newErrors.password = "Password is required";
+    } else if (loginData.password.length < 3) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    apiCall(loginData);
+    if (validate()) apiCall(loginData);
   };
   const apiCall = async (data) => {
     try {
@@ -90,11 +108,22 @@ const Login = () => {
                 value={loginData.userName}
                 id="username"
                 placeholder="Enter username"
-                onChange={(e) =>
-                  setLoginData({ ...loginData, userName: e.target.value })
-                }
-                className="w-full auth_input"
+                onChange={(e) => {
+                  // setErrors({ ...errors, userName: null });
+                  setErrors((err) => ({
+                    ...err,
+                    userName: e.target.value.length > 3 ? null : err.usserName,
+                  }));
+
+                  setLoginData({ ...loginData, userName: e.target.value });
+                }}
+                className={`w-full auth_input ${
+                  errors.userName ? " border border-red-500" : ""
+                }`}
               />
+              {errors.userName && (
+                <p className="text-red-500 text-sm mt-1">{errors.userName}</p>
+              )}
             </div>
             <div className="mb-6">
               <input
@@ -102,11 +131,22 @@ const Login = () => {
                 value={loginData.password}
                 id="password"
                 placeholder="Enter password"
-                onChange={(e) =>
-                  setLoginData({ ...loginData, password: e.target.value })
-                }
-                className="w-full auth_input"
+                onChange={(e) => {
+                  console.log("ee", e.target.value);
+
+                  setErrors((err) => ({
+                    ...err,
+                    password: e.target.value.length > 3 ? null : err.password,
+                  }));
+                  setLoginData({ ...loginData, password: e.target.value });
+                }}
+                className={`w-full auth_input  ${
+                  errors.password ? " border border-red-500" : ""
+                }`}
               />
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              )}
             </div>
             <div className="flex items-center justify-between mb-6">
               <label className="flex items-center text-gray-600">
@@ -131,7 +171,11 @@ const Login = () => {
               </div>
             </div>
 
-            <button type="submit" className="w-full mb-4 auth_button">
+            <button
+              type="submit"
+              className="w-full mb-4 auth_button"
+              disabled={loginData.userName === "" || loginData.password === ""}
+            >
               {loading ? "Logging in..." : "Login"}
             </button>
             <GoogleLogin
