@@ -5,7 +5,9 @@ import { useAuth } from "../auth-utility/AuthContext";
 import api from "../auth-utility/axiosInstance";
 import { GoogleLogin } from "@react-oauth/google";
 const Login = () => {
-  const { user, setUser } = useAuth();
+  const { user, setUser, loading } = useAuth();
+  console.log("loading", loading);
+
   const navigate = useNavigate();
   const [loginData, setLoginData] = useState({
     userName: "",
@@ -130,7 +132,7 @@ const Login = () => {
             </div>
 
             <button type="submit" className="w-full mb-4 auth_button">
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
             <GoogleLogin
               shape={"circle"}

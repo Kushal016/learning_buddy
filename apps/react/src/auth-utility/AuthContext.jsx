@@ -5,17 +5,16 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const token = getAuthToken();
     const user = getAuthUser();
-    console.log("user from context", user);
-
     if (token && user) {
       setUser(user);
     }
-    setLoading(false);
+    setAuthLoading(false);
   }, []);
 
   const logOut = () => {
@@ -23,9 +22,13 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
   return (
-    <AuthContext.Provider value={{ user, setUser, loading, logOut }}>
+    <AuthContext.Provider
+      value={{ user, setUser, authLoading, loading, setLoading, logOut }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
+
+//this is the context function which can be used across all of the components.
 export const useAuth = () => useContext(AuthContext);
