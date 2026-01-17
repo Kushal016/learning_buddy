@@ -13,6 +13,8 @@ const Login = () => {
     rememberMe: true,
   });
   const [errors, setErrors] = useState({});
+  const [apiError, setapiError] = useState(null);
+  const [resetPassSent, setResetPassSent] = useState(false);
 
   // console.log(loginData);
   useEffect(() => {
@@ -29,7 +31,9 @@ const Login = () => {
         setUser,
         navigate,
       });
+      setapiError(null);
     } catch (err) {
+      setapiError(err.message);
       console.error("Google login failed", err);
     }
   };
@@ -40,11 +44,13 @@ const Login = () => {
           userName: loginData?.userName,
         });
         if (res.data.success) {
-          alert("Rest password email sent to the associated email address.");
+          setResetPassSent(true);
+          // alert("Rest password email sent to the associated email address.");
         }
       } else {
+        setapiError("Unable to send the reset link. ");
         // console.log("");
-        alert("Please enter username");
+        // alert("Please enter username");
       }
     } catch (error) {}
   };
@@ -77,13 +83,19 @@ const Login = () => {
         password: data?.password,
         rememberMe: data?.rememberMe,
       });
-      console.log("res", res.data);
+      // console.log("res", res.data);
 
       setAuthData(res.data, data?.rememberMe);
       setUser(res.data.user);
       navigate("/dashboard");
+      setapiError(null);
     } catch (error) {
-      console.log(error.message);
+      setapiError(
+        error?.response?.data?.message
+          ? error?.response?.data?.message
+          : error.message
+      );
+      console.log(error);
     }
   };
   return (
@@ -98,7 +110,17 @@ const Login = () => {
       </div>
       <div className="w-1/2 h-full bg-purple-100 flex items-center justify-center">
         <div className="bg-white p-10 rounded-xl shadow-2xl w-88 transform transition duration-500 hover:scale-105">
-          <h2 className="text-3xl font-bold text-center text-purple-700 mb-6">
+          {resetPassSent && (
+            <div className="flex rounded text-center justify-center w-full py-1 mb-2 bg-green-100 border border-green-200 text-green-600 font-semibold">
+              Rest password link sent to the associated email address
+            </div>
+          )}
+          {apiError && (
+            <div className="flex rounded justify-center w-full py-1 mb-2 bg-red-100 border border-red-200 text-red-500 font-semibold">
+              {apiError}
+            </div>
+          )}
+          <h2 className="text-3xl font-normal text-center text-purple-700 mb-6">
             Welcome Back 👋
           </h2>
           <form onSubmit={handleSubmit}>
@@ -164,8 +186,10 @@ const Login = () => {
                 <span className="ml-2 text-sm">Remember Me</span>
               </label>
               <div
-                className="text-sm text-indigo-600 hover:underline cursor-pointer font-medium"
-                onClick={() => handleForgotPassword()}
+                className={`text-sm ${
+                  loading ? " text-slate-200" : " text-indigo-600"
+                }  hover:underline cursor-pointer font-medium`}
+                onClick={() => (loading ? null : handleForgotPassword())}
               >
                 Forgot Password?
               </div>
