@@ -1,6 +1,7 @@
 const express = require("express");
 const connectDB = require("./config/db");
 const userRoutes = require("./routers/userRoutes");
+const hfRoutes = require("./routers/HF_Routes");
 require("dotenv").config();
 const cors = require("cors");
 
@@ -18,11 +19,12 @@ app.use(
     origin: "http://localhost:5173",
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 
 // Routes
 app.use("/api", userRoutes);
+app.use("/api/hf", hfRoutes);
 
 // Start server
 app.listen(PORT, () => {
