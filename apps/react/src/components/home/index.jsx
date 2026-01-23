@@ -59,7 +59,7 @@ const Home = () => {
       <div
         className={`w-3/4 h-20 bg-white mt-4 px-4 ${
           idx % 2 === 1 ? "mr-20" : ""
-        } flex space-x-6 items-center rounded-xl`}
+        } flex space-x-6 items-center rounded-xl shadow-md`}
       >
         <div className="w-10 h-10">{card.icon}</div>
         <div className="flex flex-col space-y-1">
@@ -77,12 +77,14 @@ const Home = () => {
   ];
   const Job = () => {
     return (
-      <div className="flex flex-col space-y-4 mr-20">
-        <div className="flex justify-center content-center text-2xl text-black">How it works</div>
+      <div className="flex flex-col w-full space-y-4 mr-20">
+        <div className="flex justify-center content-center text-2xl text-black">
+          How it works
+        </div>
         <div className="grid grid-cols-3 gap-4">
           {jobs.map((j, idx) => {
             return (
-              <div className="flex flex-row space-x-2 px-4 items-center rounded-xl bg-white h-12">
+              <div className="flex flex-row space-x-2 px-4 items-center rounded-xl bg-white h-12 shadow-md">
                 <div className="w-6 h-6 rounded-full  bg-linear-to-bl from-pink-400 to-purple-600  text-white pl-2 font-bold">
                   {idx + 1}
                 </div>
@@ -92,14 +94,13 @@ const Home = () => {
           })}
         </div>
       </div>
-    
     );
   };
   return (
     <div className="bg-purple-50 w-full h-full">
       <Header />
-      <section className="w-full flex justify-between pt-16 px-6">
-        <div>
+      <section className="w-full flex justify-between pt-16 px-6 ">
+        <div className="ml-18">
           <div className="flex flex-col space-y-3">
             <div className="text-6xl font-semibold text-black">
               AI Tools for
@@ -121,29 +122,30 @@ const Home = () => {
           </div>
         </div>
 
-        <div className="pr-28">
+        <div className="">
           <div className="w-md h-112">
             <img src="home-bg-1.png" />
           </div>
         </div>
       </section>
-      <section className="w-full h-auto px-6 pb-4">
-        {cardData?.map((card) => {
-          return (
-            <div className="w-full flex space-x-8 justify-between">
-              {card.row.map((card, idx) => (
-                <Card {...{ card, idx }} />
-              ))}
-            </div>
-          );
-        })}
+      <section className="w-full h-auto  px-20 pb-4">
+        <div className="ml-16">
+          {cardData?.map((card) => {
+            return (
+              <div className="w-full flex space-x-8 justify-between">
+                {card.row.map((card, idx) => (
+                  <Card {...{ card, idx }} />
+                ))}
+              </div>
+            );
+          })}
+        </div>
       </section>
       <section className="w-full h-auto py-8 px-6">
         <Job />
       </section>
-      <section className="w-full h-auto py-8 bg-linear-to-br from-white  via-purple-600 to-pink-400"
->
-        <div className="flex flex-col space-y-4">
+      <section className="w-full h-auto py-8 bg-linear-to-br from-white  via-purple-600 to-pink-400 ">
+        <div className="flex w-full text-center flex-col space-y-4">
           <div className="flex justify-center text-2xl text-white">
             Start using AI tools for free today
           </div>
