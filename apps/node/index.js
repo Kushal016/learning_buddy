@@ -1,7 +1,7 @@
 const express = require("express");
 const connectDB = require("./config/db");
 const userRoutes = require("./routers/userRoutes");
-const hfRoutes = require("./routers/HF_Routes");
+const ORAIRoutes = require("./routers/openRouterAiRoutes");
 require("dotenv").config();
 const cors = require("cors");
 
@@ -24,7 +24,7 @@ app.use(
 
 // Routes
 app.use("/api", userRoutes);
-app.use("/api/hf", hfRoutes);
+app.use("/api/hf", ORAIRoutes);
 
 // Start server
 app.listen(PORT, () => {
