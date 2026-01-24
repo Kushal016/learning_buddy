@@ -24,7 +24,7 @@ app.use(
 
 // Routes
 app.use("/api", userRoutes);
-app.use("/api/hf", ORAIRoutes);
+app.use("/api/ai", ORAIRoutes);
 
 // Start server
 app.listen(PORT, () => {

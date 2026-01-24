@@ -2,6 +2,7 @@ const auth = require("../controllers/auth/middleware");
 const {
   fixGrammar,
   dailyPlanner,
+  explainTopic,
 } = require("../controllers/open-router-ai-services/model-controller");
 const { default: GrammarFix } = require("../models/GrammarFix");
 const express = require("express");
@@ -9,28 +10,13 @@ const express = require("express");
 const router = express.Router();
 
 router.post("/grammarfix", auth, async (req, res) => {
-  const { text, tone } = req.body;
+  const reqBody = req.body;
 
-  if (!text || text.length > 800) {
+  if (!reqBody.text || reqBody.text.length > 800) {
     return res.status(400).json({ message: "Invalid text length" });
   }
-
-  const prompt = `
-    Fix grammar of the following text in the following JSON format ONLY.
-    Keep the meaning same.
-    Tone: ${tone || "neutral"}
-    Text:${text}
-    JSON format:
-{
-  "meta": {...},
-  "Text": {...},
-  "Corrected": [...],
-  "explanation":
-}
-  `;
-
   try {
-    const result = await fixGrammar(process.env.OPEN_ROUTER_AI_MODEL, prompt);
+    const result = await fixGrammar(reqBody);
 
     // const correctedText = result[0]?.generated_text;
     // await GrammarFix.create({
@@ -40,11 +26,11 @@ router.post("/grammarfix", auth, async (req, res) => {
     //   tone,
     // });
 
-    res.json({ correctedText: result });
+    res.json({ output: result });
   } catch (err) {
-    console.log(err);
+    console.log(err.message);
 
-    res.status(500).json({ message: "AI service error" });
+    res.status(500).json({ message: "AI service error", err: err.message });
   }
 });
 
@@ -52,10 +38,18 @@ router.post("/daily-planner", auth, async (req, res) => {
   const reqBody = req.body;
 
   try {
-    const response = await dailyPlanner(
-      "meta-llama/llama-3.1-8b-instruct",
-      reqBody,
-    );
+    if (
+      !reqBody.profession ||
+      !reqBody.startWorkHours ||
+      !reqBody.endWorkHours ||
+      !reqBody.energyLevel
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Invalid request, mandatory field is missing." });
+    }
+
+    const response = await dailyPlanner(reqBody);
 
     // const correctedText = result[0]?.generated_text;
     // await GrammarFix.create({
@@ -65,7 +59,29 @@ router.post("/daily-planner", auth, async (req, res) => {
     //   tone,
     // });
 
-    res.json({ responsePlan: response });
+    res.json({ output: response });
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({ message: "AI service error", err: err.message });
+  }
+});
+
+router.post("/explain-topic", auth, async (req, res) => {
+  const reqBody = req.body;
+
+  try {
+    const response = await explainTopic(reqBody);
+
+    // const correctedText = result[0]?.generated_text;
+    // await GrammarFix.create({
+    //   userId: req.user._id,
+    //   inputText: text,
+    //   correctedText,
+    //   tone,
+    // });
+
+    res.json({ output: response });
   } catch (err) {
     console.log(err);
 

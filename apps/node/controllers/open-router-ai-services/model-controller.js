@@ -1,52 +1,44 @@
 const axios = require("axios");
+const openRouter = require("./openRouterAPI");
 
-const fixGrammar = async (model, prompt) => {
+const fixGrammar = async (data) => {
   try {
-    const response = await axios.post(
-      process.env.OPEN_ROUTER_API_BASE_URL,
-      {
-        model: model,
-        messages: [
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.OPEN_ROUTER_AI_KEY}`,
-          //"HTTP-Referer": "<YOUR_SITE_URL>", // Optional. Site URL for rankings on openrouter.ai.
-          //"X-Title": "<YOUR_SITE_NAME>", // Optional. Site title for rankings on openrouter.ai.
-          "Content-Type": "application/json",
-        },
-        timeout: 60000,
-      },
-    );
-    console.log("response", JSON.stringify(response.data));
+    const prompt = `
+    Correct the grammar of the following text.
 
-    return JSON.parse(response?.data?.choices?.[0]?.message?.content);
+Respond ONLY in valid JSON using this structure:
+
+{
+  "original_text": "",
+  "corrected_text": "",
+  "changes_summary": [],
+  "confidence_score": 0.0
+}
+
+Rules:
+- Do not add extra explanations
+- Keep original meaning intact
+- Confidence score should be between 0 and 1
+- No markdown
+- No text outside JSON
+
+Text:"${data?.text}"
+Tone: ${data.tone || "neutral"}
+`;
+    const response = await openRouter({
+      model: "mistralai/mistral-7b-instruct",
+      systemPrompt: "You are an expert in fixing the grammar of a text.",
+      prompt,
+    });
+    if (response) return response;
   } catch (error) {
-    // console.log(error.message);
-    throw error.message;
+    throw new Error(error.message);
   }
 };
 
-const dailyPlanner = async (model, data) => {
+const dailyPlanner = async (data) => {
   try {
-    const response = await axios.post(
-      process.env.OPEN_ROUTER_API_BASE_URL,
-      {
-        model: model,
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are an expert productivity coach who creates realistic daily schedules.",
-          },
-          {
-            role: "user",
-            content: `
+    const prompt = `
 You are an AI daily planner.
 
 Generate a daily plan in the following JSON format ONLY.
@@ -62,7 +54,7 @@ JSON format:
 
 User details:
 Profession: ${data.profession}
-Work hours: ${data.startWorkHours} – ${data.endWorkHours}
+Work hours: ${data.startWorkHours} - ${data.endWorkHours}
 Energy level: ${data.energyLevel}
 Timezone: Asia/Kolkata
 
@@ -71,30 +63,62 @@ Timezone: Asia/Kolkata
 - Include breaks
 - Balance work, learning, and wellness
 
-        `,
-          },
-        ],
-        temperature: 0.4,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.OPEN_ROUTER_AI_KEY}`,
-          //"HTTP-Referer": "<YOUR_SITE_URL>", // Optional. Site URL for rankings on openrouter.ai.
-          //"X-Title": "<YOUR_SITE_NAME>", // Optional. Site title for rankings on openrouter.ai.
-          "Content-Type": "application/json",
-        },
-        timeout: 60000,
-      },
-    );
+        `;
+    const response = await openRouter({
+      model: "meta-llama/llama-3.1-8b-instruct",
+      systemPrompt:
+        "You are an expert productivity coach who creates realistic daily schedules.",
 
-    return JSON.parse(response?.data?.choices?.[0]?.message?.content);
+      prompt,
+    });
+    if (response) return response;
   } catch (error) {
-    throw error.message;
-    // console.log(error.message);
+    throw new Error(error.message);
+  }
+};
+
+const explainTopic = async (data) => {
+  try {
+    if (data.topic !== null) {
+      const prompt = `
+      Explain the topic "${data.topic}". Consider the detail level as ${data?.level ?? "beginner"}
+
+Respond ONLY in valid JSON using this structure:
+
+{
+  "topic": "",
+  "DetailLevel": "beginner | intermediate | advanced",
+  "definition": "",
+  "why_it_matters": "",
+  "core_concepts": [],
+  "example": {
+    "title": "",
+    "explanation": ""
+  },
+  "common_mistakes": [],
+  "summary": ""
+}
+
+Rules:
+- No markdown
+- No extra text outside JSON
+- Keep explanations beginner-friendly
+      `;
+
+      const response = await openRouter({
+        model: "mistralai/mistral-7b-instruct",
+        systemPrompt: "You are an expert to explain topics.",
+        prompt,
+      });
+      if (response) return response;
+    }
+  } catch (error) {
+    throw new Error(error.message);
   }
 };
 
 module.exports = {
   fixGrammar,
   dailyPlanner,
+  explainTopic,
 };
