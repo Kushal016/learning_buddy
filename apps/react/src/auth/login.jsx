@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth-utility/AuthContext";
 import api from "../auth-utility/axiosInstance";
 import { GoogleLogin } from "@react-oauth/google";
+import { toast } from "react-toastify";
 const Login = () => {
   const { user, setUser, loading } = useAuth();
   const navigate = useNavigate();
@@ -13,8 +14,6 @@ const Login = () => {
     rememberMe: true,
   });
   const [errors, setErrors] = useState({});
-  const [apiError, setapiError] = useState(null);
-  const [resetPassSent, setResetPassSent] = useState(false);
 
   // console.log(loginData);
   useEffect(() => {
@@ -31,10 +30,10 @@ const Login = () => {
         setUser,
         navigate,
       });
-      setapiError(null);
+      // setapiError(null);
     } catch (err) {
-      setapiError(err.message);
-      console.error("Google login failed", err);
+      // setapiError(err.message);
+      toast.error(err.message ?? "Google login failed");
     }
   };
   const handleForgotPassword = async () => {
@@ -44,13 +43,15 @@ const Login = () => {
           userName: loginData?.userName,
         });
         if (res.data.success) {
-          setResetPassSent(true);
+          // setResetPassSent(true);
+          toast.success(
+            "Rest password email sent to the associated email address.",
+          );
           // alert("Rest password email sent to the associated email address.");
         }
       } else {
-        setapiError("Unable to send the reset link. ");
-        // console.log("");
-        // alert("Please enter username");
+        // setapiError("Unable to send the reset link. ");
+        toast.error("Unable to send the reset link.");
       }
     } catch (error) {}
   };
@@ -65,7 +66,7 @@ const Login = () => {
     if (loginData.password === "") {
       newErrors.password = "Password is required";
     } else if (loginData.password.length < 3) {
-      newErrors.password = "Password must be at least 6 characters";
+      newErrors.password = "Password must be at least 3 characters";
     }
 
     setErrors(newErrors);
@@ -83,19 +84,17 @@ const Login = () => {
         password: data?.password,
         rememberMe: data?.rememberMe,
       });
-      // console.log("res", res.data);
-
       setAuthData(res.data, data?.rememberMe);
       setUser(res.data.user);
       navigate("/dashboard");
-      setapiError(null);
+      // setapiError(null);
     } catch (error) {
-      setapiError(
+      toast.error(
         error?.response?.data?.message
           ? error?.response?.data?.message
-          : error.message
+          : error.message,
       );
-      console.log(error);
+      // console.log(error);
     }
   };
   return (
@@ -110,16 +109,16 @@ const Login = () => {
       </div>
       <div className="w-1/2 h-full bg-purple-100 flex items-center justify-center">
         <div className="bg-white p-10 rounded-xl shadow-2xl w-88 transform transition duration-500 hover:scale-105">
-          {resetPassSent && (
+          {/* {resetPassSent && (
             <div className="flex rounded text-center justify-center w-full py-1 mb-2 bg-green-100 border border-green-200 text-green-600 font-semibold">
               Rest password link sent to the associated email address
             </div>
-          )}
-          {apiError && (
+          )} */}
+          {/* {apiError && (
             <div className="flex rounded justify-center w-full py-1 mb-2 bg-red-100 border border-red-200 text-red-500 font-semibold">
               {apiError}
             </div>
-          )}
+          )} */}
           <h2 className="text-3xl font-normal text-center text-purple-700 mb-6">
             Welcome Back 👋
           </h2>
@@ -131,7 +130,6 @@ const Login = () => {
                 id="username"
                 placeholder="Enter username"
                 onChange={(e) => {
-                  // setErrors({ ...errors, userName: null });
                   setErrors((err) => ({
                     ...err,
                     userName: e.target.value.length > 3 ? null : err.usserName,
@@ -144,7 +142,9 @@ const Login = () => {
                 }`}
               />
               {errors.userName && (
-                <p className="text-red-500 text-sm mt-1">{errors.userName}</p>
+                <p className="text-red-500 text-xs ml-2 mt-1">
+                  {errors.userName}
+                </p>
               )}
             </div>
             <div className="mb-6">
@@ -154,8 +154,6 @@ const Login = () => {
                 id="password"
                 placeholder="Enter password"
                 onChange={(e) => {
-                  console.log("ee", e.target.value);
-
                   setErrors((err) => ({
                     ...err,
                     password: e.target.value.length > 3 ? null : err.password,
@@ -167,7 +165,9 @@ const Login = () => {
                 }`}
               />
               {errors.password && (
-                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                <p className="text-red-500 text-xs ml-2 mt-1">
+                  {errors.password}
+                </p>
               )}
             </div>
             <div className="flex items-center justify-between mb-6">
@@ -198,7 +198,11 @@ const Login = () => {
             <button
               type="submit"
               className="w-full mb-4 auth_button"
-              disabled={loginData.userName === "" || loginData.password === ""}
+              disabled={
+                loginData.userName === "" ||
+                loginData.password === "" ||
+                loading
+              }
             >
               {loading ? "Logging in..." : "Login"}
             </button>
@@ -207,7 +211,7 @@ const Login = () => {
               text={"continue_with"}
               logo_alignment="center"
               onSuccess={handleGoogleSuccess}
-              onError={() => console.log("Google Login Failed")}
+              onError={() => toast.error("Unable to log in using google.")}
             />
           </form>
           <p className="text-sm text-gray-500 text-center mt-6">
@@ -220,7 +224,6 @@ const Login = () => {
             </span>
           </p>
         </div>
-        {/* </div> */}
       </div>
     </div>
   );

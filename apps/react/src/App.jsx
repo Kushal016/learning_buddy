@@ -8,6 +8,7 @@ import "./App.css";
 import { mergedRoutes } from "./routes";
 import { useAuth } from "./auth-utility/AuthContext";
 import { bindLoading } from "./auth-utility/axiosInstance";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   const { setLoading } = useAuth();
@@ -16,7 +17,10 @@ function App() {
     bindLoading(setLoading);
   }, []);
   return (
-    useRoutes(mergedRoutes)
+    <div>
+      {useRoutes(mergedRoutes)}
+      <ToastContainer theme="colored" autoClose={3000} closeOnClick={true} />
+    </div>
   );
 }
 
