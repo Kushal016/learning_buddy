@@ -5,12 +5,13 @@ import { useAuth } from "../auth-utility/AuthContext";
 import { useNavigate } from "react-router-dom";
 import UploadAvatar from "./uploadAvatar";
 import api from "../auth-utility/axiosInstance";
+import { toast } from "react-toastify";
 
 const Signup = () => {
   const { setUser, loading } = useAuth();
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
-  const [apiError, setapiError] = useState("");
+  // const [apiError, setapiError] = useState("");
 
   const [signUpData, setSignUpData] = useState({
     userName: "",
@@ -31,7 +32,8 @@ const Signup = () => {
         navigate,
       });
     } catch (err) {
-      console.error("Google login failed", err);
+      toast.error("Google login failed");
+      // console.error("Google login failed", err);
     }
   };
   const validate = () => {
@@ -77,14 +79,19 @@ const Signup = () => {
       setAuthData(res.data, data?.rememberMe);
       setUser(res.data.user);
       navigate("/dashboard");
-      setapiError(null);
+      // setapiError(null);
     } catch (error) {
-      setapiError(
+      toast.error(
         error?.response?.data?.message
           ? error?.response?.data?.message
           : error.message,
       );
-      console.log(error.message);
+      // setapiError(
+      //   error?.response?.data?.message
+      //     ? error?.response?.data?.message
+      //     : error.message,
+      // );
+      // console.log(error.message);
     }
   };
 
@@ -92,11 +99,11 @@ const Signup = () => {
     <div className="w-full h-screen flex items-center">
       <div className="w-1/2 flex items-center justify-center min-h-screen bg-white">
         <div className="flex flex-col justify-center items-center w-2/3">
-          {apiError && (
+          {/* {apiError && (
             <div className="flex rounded justify-center w-full py-1 mb-2 bg-red-100 border border-red-200 text-red-500 font-semibold">
               {apiError}
             </div>
-          )}
+          )} */}
           <div className="w-full flex  space-x-30">
             <div className="w-28 h-28 ml-14">
               {signUpData.profileImage ? (
@@ -183,7 +190,9 @@ const Signup = () => {
                 className="w-full auth_input"
               />
               {errors.userName && (
-                <p className="text-red-500 text-sm -mt-3">{errors.userName}</p>
+                <p className="text-red-500 text-xs ml-2 -mt-3">
+                  {errors.userName}
+                </p>
               )}
               <input
                 type="password"
@@ -200,7 +209,9 @@ const Signup = () => {
                 className="w-full auth_input"
               />
               {errors.password && (
-                <p className="text-red-500 text-sm -mt-3">{errors.password}</p>
+                <p className="text-red-500 text-xs ml-2 -mt-3">
+                  {errors.password}
+                </p>
               )}
               <input
                 type="email"
@@ -217,7 +228,9 @@ const Signup = () => {
                 className="w-full auth_input"
               />
               {errors.email && (
-                <p className="text-red-500 text-sm -mt-3">{errors.email}</p>
+                <p className="text-red-500 text-xs ml-2 -mt-3">
+                  {errors.email}
+                </p>
               )}
               <UploadAvatar {...{ signUpData, setSignUpData }} />
 
@@ -256,7 +269,7 @@ const Signup = () => {
                 text={"signup_with"}
                 logo_alignment="center"
                 onSuccess={handleGoogleSuccess}
-                onError={() => console.log("Google Login Failed")}
+                onError={() => toast.error("Unable to sign in using google.")}
               />
             </form>
           </section>
