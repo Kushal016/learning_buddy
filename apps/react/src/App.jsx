@@ -5,20 +5,21 @@ import "./App.css";
 // import Login from "./auth/login";
 // import Signup from "./auth/signup";
 // import Dashboard from "./components/Dashboard";
-import { mergedRoutes } from "./routes";
+import { appRoutes } from "./routes";
 import { useAuth } from "./auth-utility/AuthContext";
 import { bindLoading } from "./auth-utility/axiosInstance";
 import { ToastContainer } from "react-toastify";
+import { HomeRoutes } from "./components/home/routes";
 
 function App() {
-  const { setLoading } = useAuth();
+  const { user, setLoading } = useAuth();
 
   useEffect(() => {
     bindLoading(setLoading);
   }, []);
   return (
     <div>
-      {useRoutes(mergedRoutes)}
+      {useRoutes(user ? appRoutes : HomeRoutes)}
       <ToastContainer theme="colored" autoClose={3000} closeOnClick={true} />
     </div>
   );
