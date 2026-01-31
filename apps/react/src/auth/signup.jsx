@@ -78,7 +78,7 @@ const Signup = () => {
       });
       setAuthData(res.data, data?.rememberMe);
       setUser(res.data.user);
-      navigate("/dashboard");
+      navigate("/");
       // setapiError(null);
     } catch (error) {
       toast.error(
