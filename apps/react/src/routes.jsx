@@ -8,6 +8,8 @@ import { DailyPlannerRoutes } from "./components/dailyPlanner/routes";
 import { ExplainTopicRoutes } from "./components/explainTopic/routes";
 import { SummarizerRoutes } from "./components/summarizer/routes";
 import AppLayout from "./common/AppLayout";
+import Logout from "./auth/logout";
+import { ProtectedRoute } from "./auth-utility/ProtectedRoute";
 
 export const appRoutes = [
   {
@@ -20,6 +22,16 @@ export const appRoutes = [
       DailyPlannerRoutes,
       ExplainTopicRoutes,
       SummarizerRoutes,
+      [
+        {
+          path: "/logout",
+          element: (
+            <ProtectedRoute>
+              <Logout />
+            </ProtectedRoute>
+          ),
+        },
+      ],
     ),
   },
 ];
